@@ -13,10 +13,13 @@ const db = mysql.createConnection({
   user: process.env.USER,
   password: process.env.PASSWORD, 
   database: process.env.DATABASE,
+  port: process.env.PORT,
+  ssl: {
+    rejectUnauthorized: false  }
 });
 
 app.listen(process.env.PORT, () => {
-  console.log(`Server running at http://localhost:${process.env.PORT}`);
+  console.log(`Server running at ${process.env.PORT}`);
 });
 
 
@@ -26,6 +29,22 @@ db.connect(err => {
     return;
   }
   console.log('Connected to remote MySQL');
+
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS products (
+      product_id INT AUTO_INCREMENT PRIMARY KEY,
+      product_name VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  db.query(createTableQuery, (err, result) => {
+    if (err) {
+      console.error('Error creating table:', err);
+    } else {
+      console.log('✅ Table "products" is ready.');
+    }
+  });
 });
 app.use(cors());
 
